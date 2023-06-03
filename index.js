@@ -1,13 +1,44 @@
 import { config } from "dotenv";
 import { ChatGPTAPI } from "chatgpt";
+import express from "express";
+import cors from "cors";
+
+const app = express();
+app.use(cors());
 
 config();
 
-async function example() {
+app.get("/object", async (req, res) => {
+  console.log("Request Recieved");
+  const objectName = req.query.object;
+  await getInfo(objectName).then((x) => res.send(x.text));
+  console.log("Object Sent");
+});
+
+app.listen(3000, () => {
+  console.log("App listening");
+});
+
+async function getInfo(object) {
   const api = new ChatGPTAPI({
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-  const res = await api.sendMessage("Hello World!");
-  console.log(res.text);
+  const res = await api.sendMessage(
+    `
+Can you answer these three questions about a ${object}:
+
+1. A number from 1-10 how safe is the object for the environment on a scale of 1/10
+2. which category would you put the object in: trash, recycle, compost, biohazard
+3. what is a short 1-2 sentence description on how to safely dispose of the object
+
+using this format:
+
+safety: 7,
+status: "Recycle",
+description: "Short 1-2 sentence description"
+
+`
+  );
+  return res;
 }
