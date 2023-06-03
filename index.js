@@ -28,15 +28,15 @@ async function getInfo(object) {
     `
 Can you answer these three questions about a ${object}:
 
-1. A number from 1-10 how safe is the object for the environment on a scale of 1/10
+1. A number from 1-10 with 1 being dangerous and 10 being safest, how safe is the object for the environment on a scale of 1/10
 2. which category would you put the object in: trash, recycle, compost, biohazard
 3. what is a short 1-2 sentence description on how to safely dispose of the object
 
-using the following format given below:
+using the following format given below, like its a javascript object:
 
-safety: 7,
-status: 'Recycle',
-description: 'Short 1-2 sentence description'
+{"safety": 7,
+"status": "Recycle",
+"description": "Short 1-2 sentence description"}
 
 Try your best. I only want you to answer the questions. Please only answer the way the we request.
 
