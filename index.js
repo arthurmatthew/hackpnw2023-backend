@@ -32,11 +32,13 @@ Can you answer these three questions about a ${object}:
 2. which category would you put the object in: trash, recycle, compost, biohazard
 3. what is a short 1-2 sentence description on how to safely dispose of the object
 
-using this format:
+using the following format given below:
 
 safety: 7,
-status: "Recycle",
-description: "Short 1-2 sentence description"
+status: 'Recycle',
+description: 'Short 1-2 sentence description'
+
+Try your best. I only want you to answer the questions. Please only answer the way the we request.
 
 `
   );
