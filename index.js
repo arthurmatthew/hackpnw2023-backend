@@ -1,25 +1,60 @@
 import { config } from "dotenv";
+config(); // Config Dotenv
 import { ChatGPTAPI } from "chatgpt";
 import express from "express";
 import cors from "cors";
+import { ClarifaiStub, grpc } from "clarifai-nodejs-grpc";
+
+const stub = ClarifaiStub.grpc();
+
+const metadata = new grpc.Metadata();
+metadata.set("authorization", `Key ${process.env.CLARIFAI_API_KEY}`);
+
+// Start Express App
 
 const app = express();
 app.use(cors());
 
-config();
+const predictImage = (inputs) => {
+  return new Promise((resolve, reject) => {
+    stub.PostModelOutputs(
+      {
+        // This is the model ID of a publicly available General model. You may use any other public or custom model ID.
+        model_id: "aaa03c23b3724a16a56b629203edc62c",
+        inputs: inputs,
+      },
+      metadata,
+      (err, response) => {
+        if (err) {
+          reject("Error: " + err);
+          return;
+        }
 
-app.get("/object", async (req, res) => {
-  console.log("Request Recieved");
-  const objectName = req.query.object;
-  await getInfo(objectName).then((x) => res.send(x.text));
-  console.log("Object Sent");
-});
+        if (response.status.code !== 10000) {
+          reject(
+            "Received failed status: " +
+              response.status.description +
+              "\n" +
+              response.status.details
+          );
+          return;
+        }
 
-app.listen(3000, () => {
-  console.log("App listening");
-});
+        let results = [];
+        for (const c of response.outputs[0].data.concepts) {
+          results.push({
+            name: c.name,
+            value: c.value,
+          });
+        }
+        resolve(results);
+      }
+    );
+  });
+};
 
-async function getInfo(object) {
+// Interact with ChatGPT API
+const getInfo = async (object) => {
   const api = new ChatGPTAPI({
     apiKey: process.env.OPENAI_API_KEY,
   });
@@ -43,4 +78,36 @@ Try your best. I only want you to answer the questions. Please only answer the w
 `
   );
   return res;
-}
+};
+
+app.get("/image", async (req, res) => {
+  console.log("Request Recieved");
+  const url = req.query.url;
+  const results = await predictImage([{ data: { image: { url: url } } }]);
+  res.send(results[0].name);
+});
+
+// Object Route, name of object goes in, details go out
+app.get("/object", async (req, res) => {
+  console.log("Request Recieved");
+  const objectName = req.query.object;
+  await getInfo(objectName).then((x) => res.send(x.text));
+  console.log("Object Sent");
+});
+
+// Test Route, send back test data
+app.get("/test", async (req, res) => {
+  console.log("Request Recieved");
+  res.send(`{
+    "safety": 6,
+    "status": "Lorem Ipsum",
+    "description":
+      " AKLJSd ljaklsjdl jalskjd JLASjdl jlaksjdlj aksdjkl JKLasjdljksdjl sjdkjalsjdl akjlsdjLJaskldj lajsdl jlJSld jljl"
+  }`);
+  console.log("Object Sent");
+});
+
+// Start Express server
+app.listen(3000, () => {
+  console.log("App listening");
+});
