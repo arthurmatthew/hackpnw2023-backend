@@ -108,10 +108,10 @@ app.get("/object", async (req, res) => {
 app.get("/test", async (req, res) => {
   console.log("Recieved a /test request");
   res.send(`{
-    "safety": 6,
-    "status": "Lorem Ipsum",
+    "safety": 10,
+    "status": "Compost",
     "description":
-      " AKLJSd ljaklsjdl jalskjd JLASjdl jlaksjdlj aksdjkl JKLasjdljksdjl sjdkjalsjdl akjlsdjLJaskldj lajsdl jlJSld jljl"
+      "Bananas can safely be disposed into the compost. You can even put them in your garden and use them as fertilizer."
   }`);
   console.log("Sent the test info back.");
 });
