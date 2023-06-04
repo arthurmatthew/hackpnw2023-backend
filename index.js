@@ -4,6 +4,7 @@ import { ChatGPTAPI } from "chatgpt";
 import express from "express";
 import cors from "cors";
 import { ClarifaiStub, grpc } from "clarifai-nodejs-grpc";
+import fileUpload from "express-fileupload";
 
 const stub = ClarifaiStub.grpc();
 
@@ -14,6 +15,7 @@ metadata.set("authorization", `Key ${process.env.CLARIFAI_API_KEY}`);
 
 const app = express();
 app.use(cors());
+app.use(fileUpload());
 
 const predictImage = (inputs) => {
   return new Promise((resolve, reject) => {
@@ -80,11 +82,19 @@ Try your best. I only want you to answer the questions. Please only answer the w
   return res;
 };
 
-app.get("/image", async (req, res) => {
-  console.log("Request Recieved");
-  const url = req.query.url;
-  const results = await predictImage([{ data: { image: { url: url } } }]);
-  res.send(results[0].name);
+app.post("/image", async (req, res) => {
+  console.log("Got request");
+  console.log(req.files.file);
+  if (req.files.file != null) {
+    console.log("Not null");
+    const image = req.files.file;
+    const results = await predictImage([
+      { data: { image: { base64: image.data } } },
+    ]);
+    const objectName = results[0].name;
+    console.log(objectName);
+    await getInfo(objectName).then((x) => res.send(x.text));
+  }
 });
 
 // Object Route, name of object goes in, details go out
