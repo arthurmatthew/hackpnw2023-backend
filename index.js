@@ -83,38 +83,37 @@ Try your best. I only want you to answer the questions. Please only answer the w
 };
 
 app.post("/image", async (req, res) => {
-  console.log("Got request");
+  console.log("Recieved a /image request.");
   console.log(req.files.file);
   if (req.files.file != null) {
-    console.log("Not null");
     const image = req.files.file;
     const results = await predictImage([
       { data: { image: { base64: image.data } } },
     ]);
     const objectName = results[0].name;
-    console.log(objectName);
+    console.log("Clarifai thinks this is a: " + objectName);
     await getInfo(objectName).then((x) => res.send(x.text));
   }
 });
 
 // Object Route, name of object goes in, details go out
 app.get("/object", async (req, res) => {
-  console.log("Request Recieved");
+  console.log("Recieved an /object request");
   const objectName = req.query.object;
   await getInfo(objectName).then((x) => res.send(x.text));
-  console.log("Object Sent");
+  console.log("Send the info back.");
 });
 
 // Test Route, send back test data
 app.get("/test", async (req, res) => {
-  console.log("Request Recieved");
+  console.log("Recieved a /test request");
   res.send(`{
     "safety": 6,
     "status": "Lorem Ipsum",
     "description":
       " AKLJSd ljaklsjdl jalskjd JLASjdl jlaksjdlj aksdjkl JKLasjdljksdjl sjdkjalsjdl akjlsdjLJaskldj lajsdl jlJSld jljl"
   }`);
-  console.log("Object Sent");
+  console.log("Sent the test info back.");
 });
 
 // Start Express server
